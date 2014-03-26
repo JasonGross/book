@@ -1,0 +1,34 @@
+% -*- mode: LaTeX -*-
+% This is a main LaTeX file for generating the HoTT book
+% for ebook readers in an html format, by htlatex.
+% It has low resultion images. The links are black in this version.
+
+% **** OPTIONS ****
+
+% INCLUDE A COVER
+\input{opt-cover}
+
+% DO NOT INCLUDE A BASTARD TITLE
+\input{opt-no-bastard}
+
+% BLACK & WHITE
+\input{opt-black-white}
+
+% FORMATTING DEPENDENT ON PAPER SIZE
+\input{opt-ebook}
+
+% IMAGE FOR HALF-TITLE
+\def\OPThalftorus{torus-lores-bw}
+
+% IMAGE FOR FRONT AND BACK
+\let\OPTfrontimage=\OPTlofrontimage
+\let\OPTbackimage=\OPTlobackimage
+
+% disable cleveref, it interferes with htlatex
+\PassOptionsToPackage{poorman}{cleveref}
+
+% silence non-existant \nopagecolor warning
+\PassOptionsToPackage{pagecolor=white}{pagecolor}
+
+% INCLUDE THE ACTUAL MAIN FILE
+\input{main}

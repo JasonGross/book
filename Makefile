@@ -6,6 +6,10 @@ DEFAULTTOPTEX = hott-online.tex
 # Top-level LaTeX files from which HoTT book can be generated
 TOPTEXFILES = $(DEFAULTTOPTEX) hott-ustrade.tex hott-letter.tex hott-a4.tex hott-ebook.tex hott-arxiv.tex
 
+# Top-level LaTeX files from which html can be generated
+TOPTEXHTMLFILES = hott-html.tex
+TOPTEXHTMLHELPERFILES = hott-html-helper.tex
+
 # LaTeX files that actually comprise the book
 # (that is, all of them except configuration)
 BOOKTEXFILES = 	main.tex \
@@ -59,7 +63,7 @@ HIRESPNGFILES = cover-hires-back-bw.png \
 		torus-hires-bw.png
 
 # All the LaTeX files for the HoTT book in order of dependency
-TEXFILES = $(TOPTEXFILES) $(BOOKTEXFILES) $(OPTFILES)
+TEXFILES = $(TOPTEXFILES) $(TOPTEXHTMLFILES) $(TOPTEXHTMLHELPERFILES) $(BOOKTEXFILES) $(OPTFILES)
 
 # aux files to be used when combining info from HoTT book with
 # exercises
@@ -72,9 +76,16 @@ TOPDVIFILES:=$(TOPTEXFILES:.tex=.dvi)
 # Default PDF file to make
 DEFAULTPDF:=$(DEFAULTTOPTEX:.tex=.pdf)
 
+# HTML files corresponding to HoTT book files
+TOPHTMLFILES:=$(TOPTEXHTMLFILES:.tex=.html)
+TOPHTMLHELPERSEDFILE:=$(TOPTEXHTMLHELPERFILES:.tex=.sed)
+BOOKHTMLTEXFILES:=$(BOOKTEXFILES:.tex=-html.tex)
+BOOKSEDFILE:=book-html.sed
+TOPHTMLHELPERSEDFILE2:=$(TOPHTMLHELPERSEDFILE:.sed=-modified.sed)
+
 default: $(DEFAULTPDF)
 
-all: $(TOPPDFFILES) exercise_solutions.pdf errata.pdf cover-lulu-hardcover.pdf cover-lulu-paperback.pdf cover-letter.pdf cover-a4.pdf
+all: $(TOPPDFFILES) $(TOPHTMLFILES) exercise_solutions.pdf errata.pdf cover-lulu-hardcover.pdf cover-lulu-paperback.pdf cover-letter.pdf cover-a4.pdf
 
 dvi: $(TOPDVIFILES) exercise_solutions.dvi errata.dvi cover-lulu-hardcover.dvi cover-lulu-paperback.dvi cover-letter.dvi cover-a4.dvi
 
@@ -100,6 +111,40 @@ $(TOPDVIFILES) : %.dvi : %.tex $(TEXFILES) references.bib cover-lores-front.png 
 	     latex $< ;\
 	     echo "HINT: If you think this took a long time you should install latexmk." ;\
 	fi
+
+# html targets
+$(BOOKSEDFILE): Makefile
+	rm -f $@
+	for f in $(BOOKTEXFILES:.tex=); \
+	do echo 's/\\input{'"$$f"'}/\\input{'"$$f-html"'}/g' >> $@; \
+	   echo 's/\\include{'"$$f"'}/\\include{'"$$f-html"'}/g' >> $@; \
+	done
+
+$(TOPTEXHTMLFILES): %.tex : %-helper.tex $(BOOKSEDFILE)
+	sed -f $(BOOKSEDFILE) $< > $@
+
+$(BOOKHTMLTEXFILES): %-html.tex : %.tex $(BOOKSEDFILE) $(TOPHTMLHELPERSEDFILE2)
+	sed -f $(BOOKSEDFILE) $< | sed -f $(TOPHTMLHELPERSEDFILE2) > $@
+
+$(TOPHTMLHELPERSEDFILE) : %.sed : %.tex $(TEXFILES) references.bib cover-lores-front.png cover-lores-back.png
+	if which latexmk > /dev/null 2>&1 ;\
+	then latexmk -pdf $< ;\
+	else pdflatex $< && \
+	     bibtex $(patsubst %.tex,%,$<) && \
+	     makeindex $(patsubst %.tex,%,$<) && \
+	     pdflatex $< ;\
+	     pdflatex $< ;\
+	     echo "HINT: If you think this took a long time you should install latexmk." ;\
+	fi
+
+$(TOPHTMLHELPERSEDFILE2): $(TOPHTMLHELPERSEDFILE) Makefile
+	(cat $<; sed s'/cref{/autoref{/g' $<) | sed s'|\({[^,]*}\)/\([^/]*\)\\\\ref {\([^}]*\)}\([^/]*\)/g|\1/{\\\\hyperref[\3]{\2\\\\ref*{\3}\4}}/g|g' > $@
+
+$(TOPHTMLFILES) : %.html : %.tex $(TEXFILES) $(BOOKHTMLTEXFILES) references.bib cover-lores-front.png cover-lores-back.png
+	htlatex $< && \
+	tex '\def\filename{{$(<:.tex=)}{idx}{4dx}{ind}} \input  idxmake.4ht' && \
+        makeindex -o $(<:.tex=.ind) $(<:.tex=.4dx) && \
+	htlatex $<
 
 all default: log-check
 log-check:
@@ -163,7 +208,7 @@ exercise_solutions.pdf exercise_solutions.dvi: main.labels
 errata.pdf errata.dvi: version.tex main.labels
 
 clean:
-	rm -f *~ *.aux {exercise_solutions,errata,hott-*}.{out,log,pdf,dvi,fls,fdb_latexmk,aux,brf,bbl,idx,ilg,ind,toc,sed}
+	rm -f *~ *.aux {exercise_solutions,errata,hott-*}.{out,log,pdf,dvi,fls,fdb_latexmk,aux,brf,bbl,idx,ilg,ind,toc,sed,html}
 	if which latexmk > /dev/null 2>&1 ; then latexmk -C hott-*.tex; fi
 
 # list the tex files explicitly because:

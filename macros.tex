@@ -156,7 +156,8 @@
 \makeatother
 
 % Other notations related to dependent sums
-\let\setof\Set    % from package 'braket', write \setof{ x:A | P(x) }.
+%\let\setof\Set    % from package 'braket', write \setof{ x:A | P(x) }.
+\newcommand{\setof}[1]{\bgroup\Set{#1}\egroup} % we need extra groups in htlatex, for some reason
 \newcommand{\pair}{\ensuremath{\mathsf{pair}}\xspace}
 \newcommand{\tup}[2]{(#1,#2)}
 \newcommand{\proj}[1]{\ensuremath{\mathsf{pr}_{#1}}\xspace}

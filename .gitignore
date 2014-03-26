@@ -5,6 +5,13 @@
 hott-*.pdf
 main.pdf
 errata*.pdf
+*.4ct
+*.4tc
+*.css
+*.idv
+*.lg
+*.tmp
+*.xref
 *.dvi
 *.bbl
 *.fls
@@ -43,3 +50,11 @@ cover-letter.pdf
 version.tex
 hott-arxiv.tex
 hott-arxiv.tar.gz
+hott-html*.png
+hott-html*.html
+*-html.tex
+hott-html.out.ps
+rsfs*.png
+stmary*.png
+zplmr*.png
+zzhott-html.ps
