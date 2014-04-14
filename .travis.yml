@@ -31,6 +31,7 @@ install:
  - ./etc/ci/wget_retry.sh http://mirrors.ctan.org/macros/latex/contrib/braket/braket.sty
  - ./etc/ci/wget_retry.sh http://mirrors.ctan.org/macros/latex/contrib/supertabular/supertabular.dtx http://mirrors.ctan.org/macros/latex/contrib/supertabular/supertabular.ins && latex supertabular.ins
  - ./etc/ci/wget_retry.sh http://mirrors.ctan.org/macros/latex/contrib/soul/soul.dtx http://mirrors.ctan.org/macros/latex/contrib/soul/soul.ins && latex soul.ins
+ - wget http://mirrors.ctan.org/obsolete/support/TeX4ht/tex4ht-all.zip && unzip tex4ht-all.zip && unzip tex4ht.zip && mv texmf/tex/generic/tex4ht/* ./
 
 script: make $TARGETS
 

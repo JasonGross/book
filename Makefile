@@ -138,13 +138,22 @@ $(TOPHTMLHELPERSEDFILE) : %.sed : %.tex $(TEXFILES) references.bib cover-lores-f
 	fi
 
 $(TOPHTMLHELPERSEDFILE2): $(TOPHTMLHELPERSEDFILE) Makefile
-	(cat $<; sed s'/cref{/autoref{/g' $<) | sed s'|\({[^,]*}\)/\([^/]*\)\\\\ref {\([^}]*\)}\([^/]*\)/g|\1/{\\\\hyperref[\3]{\2\\\\ref*{\3}\4}}/g|g' > $@
+	cat $< | sed s'|\({[^,]*}\)/\([^/]*\)\\\\ref {\([^}]*\)}\([^/]*\)/g|\1/{\\\\hyperref[\3]{\2\\\\ref*{\3}\4}}/g|g' > $@
 
 $(TOPHTMLFILES) : %.html : %.tex $(TEXFILES) $(BOOKHTMLTEXFILES) references.bib cover-lores-front.png cover-lores-back.png
 	htlatex $< && \
 	tex '\def\filename{{$(<:.tex=)}{idx}{4dx}{ind}} \input  idxmake.4ht' && \
         makeindex -o $(<:.tex=.ind) $(<:.tex=.4dx) && \
 	htlatex $<
+
+fix-html.sed: $(TOPHTMLFILES)
+	(for i in $$(grep -o 'src="[^"]\+' *.html | grep -o '[^"]\+$$' | sort | uniq); do if [ ! -e "$$i" ]; then echo "s/<img src=\"$$i\" alt=\"PICT\" >/<"'!'"-- img src=\"$$i\" alt=\"PICT\" -->/g"; fi; done) > $@
+
+$(TOPHTMLFILES:.html=-fixed.html) : %-fixed.html : %.html fix-html.sed
+	sed ':a;N;$!ba;s/<img[^a-z]\+src=/<img src=/g' $< > $@
+	sed s'/$</$@/g' -i *.html
+	sed -f fix-html.sed -i $@
+
 
 all default: log-check
 log-check:
