@@ -803,6 +803,26 @@
 \newcounter{symindex}
 \newcommand{\symlabel}[1]{\refstepcounter{symindex}\label{#1}}
 
+
+% some modifications for htlatex
+\makeatletter
+\@ifpackageloaded{tex4ht}{
+\AtEndPreamble{
+% disable \mathsf so we get fewer images
+\let\mathsf\relax    % just to avoid a message in the log file
+\DeclareRobustCommand{\mathsf}[1]{\text{\normalfont\sffamily#1}}
+% make \vcentcolon just a colon to avoid making it an image
+\def\vcentcolon{:}
+\def\qedhere{\hfill\ensuremath{\square}}
+%\def\setof#1{\{\bgroup#1\egroup\}}
+%\let\left\relax
+%\let\middle\relax
+%\let\right\relax
+%\let\mathopen\relax
+%\def\:{}
+}
+}{}
+
 % Local Variables:
 % mode: latex
 % TeX-master: "hott-online"

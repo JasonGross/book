@@ -146,13 +146,13 @@ $(TOPHTMLFILES) : %.html : %.tex $(TEXFILES) $(BOOKHTMLTEXFILES) references.bib 
         makeindex -o $(<:.tex=.ind) $(<:.tex=.4dx) && \
 	htlatex $<
 
-fix-html.sed: $(TOPHTMLFILES)
-	(for i in $$(grep -o 'src="[^"]\+' *.html | grep -o '[^"]\+$$' | sort | uniq); do if [ ! -e "$$i" ]; then echo "s/<img src=\"$$i\" alt=\"PICT\" >/<"'!'"-- img src=\"$$i\" alt=\"PICT\" -->/g"; fi; done) > $@
+fix-html.sed: $(TOPHTMLFILES) Makefile
+	(echo "#!/bin/bash"; for i in $$(grep -o 'src="[^"]\+' *.html | grep -o '[^"]\+$$' | sort | uniq); do if [ ! -e "$$i" ]; then echo "sed s'/<img src=\"$$i\" alt=\"PICT\" >/<"'!'"-- img src=\"$$i\" alt=\"PICT\" -->/g' -i \"\$$1\""; fi; done) > $@
 
 $(TOPHTMLFILES:.html=-fixed.html) : %-fixed.html : %.html fix-html.sed
-	sed ':a;N;$!ba;s/<img[^a-z]\+src=/<img src=/g' $< > $@
+	sed ':a;N;$$!ba;s/<img[^a-z]\+src=/<img src=/g' $< > $@
 	sed s'/$</$@/g' -i *.html
-	sed -f fix-html.sed -i $@
+	bash -ex fix-html.sed $@
 
 
 all default: log-check
