@@ -807,20 +807,23 @@
 % some modifications for htlatex
 \makeatletter
 \@ifpackageloaded{tex4ht}{
-\AtEndPreamble{
+\AtBeginDocument{%
 % disable \mathsf so we get fewer images
 \let\mathsf\relax    % just to avoid a message in the log file
-\DeclareRobustCommand{\mathsf}[1]{\text{\normalfont\sffamily#1}}
+\DeclareRobustCommand{\mathsf}[1]{\text{\normalfont\sffamily#1}}%
 % make \vcentcolon just a colon to avoid making it an image
-\def\vcentcolon{:}
-\def\qedhere{\hfill\ensuremath{\square}}
+\def\vcentcolon{:}%
+\def\qedhere{\hfill\ensuremath{\square}}%
+% htlatex likes align* (turns it into text), but doesn't like \[\] (turns it into images)
+% but we can't do it because it breaks xymatrix, sometimes.  How to filter out the xymatrix ones?
+%\def\[#1\]{\begin{align*}#1\end{align*}}%
 %\def\setof#1{\{\bgroup#1\egroup\}}
 %\let\left\relax
 %\let\middle\relax
 %\let\right\relax
 %\let\mathopen\relax
 %\def\:{}
-}
+}%
 }{}
 
 % Local Variables:
